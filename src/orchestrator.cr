@@ -72,7 +72,10 @@ module Conveyor
         @log.info { "Checking for orphans" }
 
         begin
-          scan_for_orphans
+          scan_for_orphans(
+            belt_presence_duration: interval * 2,
+            orphan_check_duration: interval - 1.millisecond,
+          )
         rescue ex
           @on_error.call ex
         end
@@ -82,17 +85,17 @@ module Conveyor
     end
 
     # :nodoc:
-    def scan_for_orphans
+    def scan_for_orphans(belt_presence_duration : Time::Span, orphan_check_lock_duration : Time::Span)
       redis = @config.redis
 
       # Ensure we refresh the existence keys for all of the belts
       redis.pipeline do |pipe|
         @belts.each do |belt|
-          pipe.set "conveyor:belt:#{belt.id}", "", ex: interval * 2
+          pipe.set "conveyor:belt:#{belt.id}", "", ex: belt_presence_duration
         end
       end
 
-      if redis.set("conveyor:lock:orphan-check", "", nx: true, ex: interval - 1.millisecond)
+      if redis.set("conveyor:lock:orphan-check", "", nx: true, ex: orphan_check_lock_duration
         belt_id_cache = Hash(String, Bool).new do |cache, key|
           cache[key] = redis.exists("conveyor:belt:#{key}") == 0
         end
