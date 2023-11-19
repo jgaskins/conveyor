@@ -42,7 +42,9 @@ module Conveyor
       @belts.each(&.stop)
     end
 
-    def on_error(&block : ::Exception -> Nil) : self
+    @on_error : (::Exception -> Nil) = ->(ex : ::Exception) {}
+
+    def on_error(&@on_error : ::Exception -> Nil) : self
       @belts.each(&.on_error(&block))
       self
     end
