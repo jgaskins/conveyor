@@ -95,7 +95,7 @@ module Conveyor
         end
       end
 
-      if redis.set("conveyor:lock:orphan-check", "", nx: true, ex: orphan_check_lock_duration
+      if redis.set("conveyor:lock:orphan-check", "", nx: true, ex: orphan_check_lock_duration)
         belt_id_cache = Hash(String, Bool).new do |cache, key|
           cache[key] = redis.exists("conveyor:belt:#{key}") == 0
         end
