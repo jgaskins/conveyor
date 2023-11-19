@@ -73,7 +73,7 @@ module Conveyor
         @log.info { "Checking for orphans" }
 
         begin
-          run_orphan_scan
+          scan_for_orphans
         rescue ex
           @on_error.call ex
         end
