@@ -64,7 +64,6 @@ module Conveyor
     # the belt was shut down. This method will periodically scan for those jobs
     # and re-enqueue them.
     private def check_for_orphans
-      redis = @config.redis
       interval = 10.minutes
 
       while @running
@@ -84,6 +83,8 @@ module Conveyor
 
     # :nodoc:
     def scan_for_orphans
+      redis = @config.redis
+
       # Ensure we refresh the existence keys for all of the belts
       redis.pipeline do |pipe|
         @belts.each do |belt|
@@ -120,7 +121,6 @@ module Conveyor
     end
 
     def check_for_scheduled
-      redis = @config.redis
       while @running
         sleep 1.second
 
@@ -133,6 +133,8 @@ module Conveyor
     end
 
     def enqueue_scheduled_jobs
+      redis = @config.redis
+
       ids = redis
         .zrange("conveyor:scheduled", "-inf"..Time.utc.to_unix_ms, by: :score)
         .as(Array)
