@@ -6,6 +6,8 @@ module Conveyor
   abstract struct Job
     include JSON::Serializable
 
+    abstract def call
+
     private REGISTRY = {} of String => Job.class
 
     macro inherited
