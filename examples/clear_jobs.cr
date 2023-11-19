@@ -1,0 +1,15 @@
+require "redis"
+
+redis = Redis::Client.new
+
+redis.pipeline do |pipe|
+  # Delete all jobs
+  redis.scan_each match: "conveyor:job:*" do |key|
+    pipe.unlink key
+  end
+
+  # Remove UUID keys
+  redis.scan_each match: "????????-????-????-????-????????????" do |key|
+    pipe.unlink key
+  end
+end
