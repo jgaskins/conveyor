@@ -1,5 +1,6 @@
 require "redis"
 require "./job_data"
+require "./job"
 
 module Conveyor
   class Belt

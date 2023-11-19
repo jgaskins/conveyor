@@ -1,3 +1,6 @@
+require "./belt"
+require "./configuration"
+
 module Conveyor
   class Orchestrator
     @config : Configuration
