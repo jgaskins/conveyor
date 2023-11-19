@@ -74,7 +74,7 @@ module Conveyor
         begin
           scan_for_orphans(
             belt_presence_duration: interval * 2,
-            orphan_check_duration: interval - 1.millisecond,
+            orphan_check_lock_duration: interval - 1.millisecond,
           )
         rescue ex
           @on_error.call ex
