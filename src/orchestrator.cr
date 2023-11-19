@@ -72,40 +72,50 @@ module Conveyor
 
         @log.info { "Checking for orphans" }
 
-        # Ensure we refresh the existence keys for all of the belts
-        redis.pipeline do |pipe|
-          @belts.each do |belt|
-            pipe.set "conveyor:belt:#{belt.id}", "", ex: interval * 2
-          end
+        begin
+          run_orphan_scan
+        rescue ex
+          @on_error.call ex
         end
 
-        if redis.set("conveyor:lock:orphan-check", "", nx: true, ex: interval - 1.millisecond)
-          belt_id_cache = Hash(String, Bool).new do |cache, key|
-            cache[key] = redis.exists("conveyor:belt:#{key}") == 0
-          end
-          now = Time.utc.to_unix_ms
+        @log.info { "Orphan scan complete" }
+      end
+    end
 
-          # Begin crawling through Redis for Conveyor jobs
-          redis.scan_each match: "conveyor:job:*" do |key|
-            # Only jobs that have been scheduled or picked up by a belt count as
-            # orphans, and we also need to know which queue to enqueue it under
-            # if it is indeed an orphan, so we select only those fields.
-            if raw_job_data = redis.hmget(key, "queue", "pending", "belt_id").as?(Array)
-              queue, pending, belt_id = raw_job_data
+    # :nodoc:
+    def scan_for_orphans
+      # Ensure we refresh the existence keys for all of the belts
+      redis.pipeline do |pipe|
+        @belts.each do |belt|
+          pipe.set "conveyor:belt:#{belt.id}", "", ex: interval * 2
+        end
+      end
 
-              # Job ids are "conveyor:job:#{id}"
-              id = key.lchop "conveyor:job:"
+      if redis.set("conveyor:lock:orphan-check", "", nx: true, ex: interval - 1.millisecond)
+        belt_id_cache = Hash(String, Bool).new do |cache, key|
+          cache[key] = redis.exists("conveyor:belt:#{key}") == 0
+        end
+        now = Time.utc.to_unix_ms
 
-              # If it was set as pending and it has a belt id that no longer
-              # matches a running belt, then the job is orphaned and needs to be
-              # requeued in its original queue.
-              if pending && belt_id && belt_id_cache[belt_id] == 0
-                redis.rpush "conveyor:queue:#{queue}", id
-              end
+        # Begin crawling through Redis for Conveyor jobs
+        redis.scan_each match: "conveyor:job:*" do |key|
+          # Only jobs that have been scheduled or picked up by a belt count as
+          # orphans, and we also need to know which queue to enqueue it under
+          # if it is indeed an orphan, so we select only those fields.
+          if raw_job_data = redis.hmget(key, "queue", "pending", "belt_id").as?(Array)
+            queue, pending, belt_id = raw_job_data
+
+            # Job ids are "conveyor:job:#{id}"
+            id = key.lchop "conveyor:job:"
+
+            # If it was set as pending and it has a belt id that no longer
+            # matches a running belt, then the job is orphaned and needs to be
+            # requeued in its original queue.
+            if pending && belt_id && belt_id_cache[belt_id] == 0
+              redis.rpush "conveyor:queue:#{queue}", id
             end
           end
         end
-        @log.info { "Orphan scan complete" }
       end
     end
 
@@ -114,28 +124,36 @@ module Conveyor
       while @running
         sleep 1.second
 
-        ids = redis
-          .zrange("conveyor:scheduled", "-inf"..Time.utc.to_unix_ms, by: :score)
-          .as(Array)
-          .map(&.as(String))
-
-        ids_and_queues = redis.pipeline do |pipe|
-          ids.each do |id|
-            pipe.hmget("conveyor:job:#{id}", "id", "queue")
-          end
+        begin
+          enqueue_scheduled_jobs
+        rescue ex
+          @on_error.call ex
         end
+      end
+    end
 
-        if ids.any?
-          redis.multi do |txn|
-            ids_and_queues.each do |results|
-              id, queue = results.as(Array)
-              if id && queue
-                txn.rpush "conveyor:queue:#{queue}", id.as(String)
-              end
+    def enqueue_scheduled_jobs
+      ids = redis
+        .zrange("conveyor:scheduled", "-inf"..Time.utc.to_unix_ms, by: :score)
+        .as(Array)
+        .map(&.as(String))
+
+      ids_and_queues = redis.pipeline do |pipe|
+        ids.each do |id|
+          pipe.hmget("conveyor:job:#{id}", "id", "queue")
+        end
+      end
+
+      if ids.any?
+        redis.multi do |txn|
+          ids_and_queues.each do |results|
+            id, queue = results.as(Array)
+            if id && queue
+              txn.rpush "conveyor:queue:#{queue}", id.as(String)
             end
-
-            txn.zrem "conveyor:scheduled", ids
           end
+
+          txn.zrem "conveyor:scheduled", ids
         end
       end
     end
