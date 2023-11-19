@@ -20,10 +20,14 @@ module Conveyor
       @running = true
 
       while running?
-        @state = :waiting
-        if job_data = fetch
-          @state = :working
-          work job_data
+        begin
+          @state = :waiting
+          if job_data = fetch
+            @state = :working
+            work job_data
+          end
+        rescue ex
+          @on_error.call ex
         end
       end
     ensure
