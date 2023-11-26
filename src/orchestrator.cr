@@ -90,31 +90,36 @@ module Conveyor
 
     # :nodoc:
     def scan_for_orphans(lock_duration : Time::Span)
+      if @config.redis.set("conveyor:lock:orphan-check", "", nx: true, ex: lock_duration)
+        scan_for_orphans!
+      end
+    end
+
+    # :nodoc:
+    def scan_for_orphans!
       redis = @config.redis
 
-      if redis.set("conveyor:lock:orphan-check", "", nx: true, ex: lock_duration)
-        belt_id_cache = Hash(String, Bool).new do |cache, key|
-          cache[key] = redis.exists("conveyor:belt:#{key}") == 0
-        end
-        now = Time.utc.to_unix_ms
+      belt_id_cache = Hash(String, Bool).new do |cache, key|
+        cache[key] = redis.exists("conveyor:belt:#{key}") == 1
+      end
+      now = Time.utc.to_unix_ms
 
-        # Begin crawling through Redis for Conveyor jobs
-        redis.scan_each match: "conveyor:job:*" do |key|
-          # Only jobs that have been scheduled or picked up by a belt count as
-          # orphans, and we also need to know which queue to enqueue it under
-          # if it is indeed an orphan, so we select only those fields.
-          if raw_job_data = redis.hmget(key, "queue", "pending", "belt_id").as?(Array)
-            queue, pending, belt_id = raw_job_data
+      # Begin crawling through Redis for Conveyor jobs
+      redis.scan_each match: "conveyor:job:*" do |key|
+        # Only jobs that have been scheduled or picked up by a belt count as
+        # orphans, and we also need to know which queue to enqueue it under
+        # if it is indeed an orphan, so we select only those fields.
+        if raw_job_data = redis.hmget(key, "queue", "pending", "belt_id").as?(Array)
+          queue, pending, belt_id = raw_job_data
 
-            # Job ids are "conveyor:job:#{id}"
-            id = key.lchop "conveyor:job:"
+          # Job ids are "conveyor:job:#{id}"
+          id = key.lchop "conveyor:job:"
 
-            # If it was set as pending and it has a belt id that no longer
-            # matches a running belt, then the job is orphaned and needs to be
-            # requeued in its original queue.
-            if pending && belt_id && belt_id_cache[belt_id] == 0
-              redis.rpush "conveyor:queue:#{queue}", id
-            end
+          # If it was set as pending and it has a belt id that no longer
+          # matches a running belt, then the job is orphaned and needs to be
+          # requeued in its original queue.
+          if pending && belt_id && belt_id_cache[belt_id] == false
+            redis.rpush "conveyor:queue:#{queue}", id
           end
         end
       end
@@ -133,11 +138,11 @@ module Conveyor
     end
 
     # :nodoc:
-    def enqueue_scheduled_jobs
+    def enqueue_scheduled_jobs(from start_time = "-inf", until end_time = Time.utc)
       redis = @config.redis
 
       ids = redis
-        .zrange("conveyor:scheduled", "-inf"..Time.utc.to_unix_ms, by: :score)
+        .zrange("conveyor:scheduled", start_time..end_time, by: :score)
         .as(Array)
         .map(&.as(String))
 
@@ -167,15 +172,28 @@ module Redis
   module Commands::SortedSet
     def zrange(
       key : String,
-      range : Range(Value, Value),
+      range : Range(Value | Time, Value | Time),
       *,
       by sort_type : SortType? = nil,
       rev reverse : Bool? = nil,
       limit : {Int64, Int64}? = nil,
       withscores : Bool? = nil
     )
+      low = case value = range.begin
+            in Value
+              value
+            in Time
+              value.to_unix_ms
+            end
+      high = case value = range.end
+             in Value
+               value
+             in Time
+               value.to_unix_ms
+             end
+
       command = Array(String).new(initial_capacity: 10)
-      command << "zrange" << key << range.begin.to_s << range.end.to_s
+      command << "zrange" << key << low.to_s << high.to_s
       command << "by#{sort_type}" if sort_type
       command << "rev" if reverse
       if limit
