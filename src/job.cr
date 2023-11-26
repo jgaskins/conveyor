@@ -65,7 +65,7 @@ module Conveyor
       self
     end
 
-    def dequeue(*,  configuration config : Configuration = CONFIG) : self
+    def dequeue(*, configuration config : Configuration = CONFIG) : self
       # We don't need to remove the job from any queues. When the job fetcher
       # retrieves the job data, if the key doesn't exist it will ignore it and
       # move onto the next job. This makes dequeuing an O(1) operation.
@@ -75,7 +75,6 @@ module Conveyor
 
     def unschedule(configuration config : Configuration = CONFIG)
       config.redis.zrem "conveyor:scheduled", conveyor_job_id
-
     end
 
     def queue
