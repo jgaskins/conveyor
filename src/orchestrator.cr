@@ -7,9 +7,14 @@ module Conveyor
     @belts : Array(Belt)
     @running = false
 
-    def initialize(configuration @config, @log = Log.for("conveyor"))
+    def initialize(configuration @config = CONFIG, @log = Log.for("conveyor"))
       @belts = Array.new(config.concurrency) do
-        Belt.new(config.redis, config.queues, log: @log)
+        Belt.new(
+          redis: config.redis,
+          queues: config.queues,
+          presence_duration: config.orphan_check_interval * 1.5,
+          log: @log,
+        )
       end
     end
 
@@ -45,7 +50,7 @@ module Conveyor
     @on_error : (::Exception -> Nil) = ->(ex : ::Exception) {}
 
     def on_error(&@on_error : ::Exception -> Nil) : self
-      @belts.each(&.on_error(&block))
+      @belts.each(&.on_error(&on_error))
       self
     end
 
@@ -66,7 +71,7 @@ module Conveyor
     # the belt was shut down. This method will periodically scan for those jobs
     # and re-enqueue them.
     private def check_for_orphans
-      interval = 10.minutes
+      interval = @config.orphan_check_interval
 
       while @running
         sleep interval
@@ -74,10 +79,7 @@ module Conveyor
         @log.info { "Checking for orphans" }
 
         begin
-          scan_for_orphans(
-            belt_presence_duration: interval * 2,
-            orphan_check_lock_duration: interval - 1.millisecond,
-          )
+          scan_for_orphans lock_duration: interval - 1.millisecond
         rescue ex
           @on_error.call ex
         end
@@ -87,17 +89,10 @@ module Conveyor
     end
 
     # :nodoc:
-    def scan_for_orphans(belt_presence_duration : Time::Span, orphan_check_lock_duration : Time::Span)
+    def scan_for_orphans(lock_duration : Time::Span)
       redis = @config.redis
 
-      # Ensure we refresh the existence keys for all of the belts
-      redis.pipeline do |pipe|
-        @belts.each do |belt|
-          pipe.set "conveyor:belt:#{belt.id}", "", ex: belt_presence_duration
-        end
-      end
-
-      if redis.set("conveyor:lock:orphan-check", "", nx: true, ex: orphan_check_lock_duration)
+      if redis.set("conveyor:lock:orphan-check", "", nx: true, ex: lock_duration)
         belt_id_cache = Hash(String, Bool).new do |cache, key|
           cache[key] = redis.exists("conveyor:belt:#{key}") == 0
         end
@@ -125,7 +120,7 @@ module Conveyor
       end
     end
 
-    def check_for_scheduled
+    private def check_for_scheduled
       while @running
         sleep 1.second
 
@@ -137,6 +132,7 @@ module Conveyor
       end
     end
 
+    # :nodoc:
     def enqueue_scheduled_jobs
       redis = @config.redis
 

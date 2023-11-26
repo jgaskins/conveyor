@@ -6,6 +6,9 @@ module Conveyor
   abstract struct Job
     include JSON::Serializable
 
+    # :nodoc:
+    getter conveyor_job_id : String { generate_id }
+
     abstract def call
 
     private REGISTRY = {} of String => Job.class
@@ -34,37 +37,52 @@ module Conveyor
       enqueue at: delay.from_now
     end
 
-    def enqueue(at time : Time, queue : String = self.queue, configuration config : Configuration = CONFIG)
-      id = generate_id.to_s
+    def enqueue(at time : Time, queue : String = self.queue, configuration config : Configuration = CONFIG) : self
       config.redis.pipeline do |pipe|
-        pipe.hset "conveyor:job:#{id}",
-          id: id,
+        pipe.hset "conveyor:job:#{conveyor_job_id}",
+          id: conveyor_job_id,
           type: conveyor_job_type,
           queue: queue,
           payload: to_json
         pipe.zadd "conveyor:scheduled",
           score: time.to_unix_ms,
-          value: id
+          value: conveyor_job_id
       end
+
+      self
     end
 
-    def enqueue(*, queue : String = self.queue, configuration config : Configuration = CONFIG)
-      id = generate_id.to_s
+    def enqueue(*, queue : String = self.queue, configuration config : Configuration = CONFIG) : self
       config.redis.pipeline do |pipe|
-        pipe.hset "conveyor:job:#{id}",
-          id: id,
+        pipe.hset "conveyor:job:#{conveyor_job_id}",
+          id: conveyor_job_id,
           type: conveyor_job_type,
           queue: queue,
           payload: to_json
-        pipe.rpush "conveyor:queue:#{queue}", id
+        pipe.rpush "conveyor:queue:#{queue}", conveyor_job_id
       end
-      id
+
+      self
+    end
+
+    def dequeue(*,  configuration config : Configuration = CONFIG) : self
+      # We don't need to remove the job from any queues. When the job fetcher
+      # retrieves the job data, if the key doesn't exist it will ignore it and
+      # move onto the next job. This makes dequeuing an O(1) operation.
+      config.redis.unlink "conveyor:job:#{conveyor_job_id}"
+      self
+    end
+
+    def unschedule(configuration config : Configuration = CONFIG)
+      config.redis.zrem "conveyor:scheduled", conveyor_job_id
+
     end
 
     def queue
       "default"
     end
 
+    # :nodoc:
     def generate_id
       UUID.random.to_s
     end

@@ -12,12 +12,21 @@ module Conveyor
     @queues : Array(String)
     @on_error : Proc(::Exception, Nil) = ->(ex : ::Exception) {}
     @jobs = Deque(Time::Span).new
+    @presence_duration : Time::Span
 
-    def initialize(@redis, @queues, @timeout = 2.seconds, @log = Log.for("conveyor.belt"))
+    def initialize(*, @redis, @queues, @presence_duration, @timeout = 2.seconds, @log = Log.for("conveyor.belt"))
     end
 
     def start
       @running = true
+
+      spawn do
+        loop do
+          # Ensure we refresh the existence keys for all of the belts
+          @redis.set "conveyor:belt:#{id}", "", ex: @presence_duration
+          sleep 1.second
+        end
+      end
 
       while running?
         begin
@@ -101,6 +110,9 @@ module Conveyor
     end
 
     def reenqueue(job_data : JobData, exception : ::Exception?)
+      # Exponential backoff
+      scheduled_time = (1 << job_data.attempts).milliseconds
+
       @redis.pipeline do |pipe|
         job_key = "conveyor:job:#{job_data.id}"
         pipe.hincrby job_key, "attempts", "1"
@@ -109,6 +121,9 @@ module Conveyor
         if message = exception.try(&.message)
           pipe.hset job_key, "error", message
         end
+        pipe.zadd "conveyor:scheduled",
+          score: scheduled_time.from_now.to_unix_ms,
+          value: job_data.id
       end
     end
 

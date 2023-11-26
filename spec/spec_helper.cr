@@ -1,2 +1,5 @@
 require "spec"
-require "../src/conveyor"
+
+Conveyor.configure do |c|
+  c.redis = Redis::Client.new
+end
