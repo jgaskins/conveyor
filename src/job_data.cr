@@ -1,3 +1,6 @@
+require "./job"
+require "./errors"
+
 module Conveyor
   struct JobData
     getter id : String
@@ -18,6 +21,14 @@ module Conveyor
     end
 
     def initialize(@id, @type, @queue, @attempts, @payload)
+    end
+
+    def job
+      if handler = Job.handler_for(type)
+        handler.from_json payload
+      else
+        raise UnknownJobType.new("No job type registered for #{type.inspect}")
+      end
     end
   end
 end

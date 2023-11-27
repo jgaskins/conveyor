@@ -19,5 +19,8 @@ module Conveyor
     property orphan_check_interval : Time::Span do
       ENV.fetch("CONVEYOR_ORPHAN_CHECK_DURATION_MIN", "10").to_f.minutes
     end
+    property max_attempts : Int32 do
+      ENV.fetch("CONVEYOR_JOB_MAX_ATTEMPTS", "25").to_i32
+    end
   end
 end

@@ -3,7 +3,17 @@ require "../src/job"
 
 Conveyor.configure do |c|
   c.redis = Redis::Client.new(URI.parse("redis:///?max_idle_pool_size=10"))
+  c.queues = %w[critical high default low]
   c.concurrency = 10
+  c.max_attempts = 15
+end
+
+struct ErrorJob < Conveyor::Job
+  queue "low"
+
+  def call
+    raise "hell"
+  end
 end
 
 struct ExampleJob < Conveyor::Job

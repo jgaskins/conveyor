@@ -14,6 +14,7 @@ module Conveyor
           queues: config.queues,
           presence_duration: config.orphan_check_interval * 1.5,
           log: @log,
+          max_attempts: config.max_attempts,
         )
       end
     end
@@ -126,25 +127,34 @@ module Conveyor
     end
 
     private def check_for_scheduled
-      while @running
-        sleep 1.second
+      interval = 1.second
 
-        begin
-          enqueue_scheduled_jobs
-        rescue ex
-          @on_error.call ex
+      while @running
+        sleep interval
+
+        if @config.redis.set("conveyor:lock:schedule-check", "", nx: true, ex: interval - 10.milliseconds)
+          begin
+            enqueue_scheduled_jobs!
+          rescue ex
+            @on_error.call ex
+          end
         end
       end
     end
 
     # :nodoc:
-    def enqueue_scheduled_jobs(from start_time = "-inf", until end_time = Time.utc)
+    def enqueue_scheduled_jobs!(from start_time = "-inf", until end_time = Time.utc)
       redis = @config.redis
 
+      # TODO: Optimize this entire method to reduce heap allocations, because
+      # if we have a massive backlog of scheduled jobs, this will involve a lot
+      # of allocations.
       ids = redis
         .zrange("conveyor:scheduled", start_time..end_time, by: :score)
         .as(Array)
         .map(&.as(String))
+
+      return if ids.empty?
 
       ids_and_queues = redis.pipeline do |pipe|
         ids.each do |id|
@@ -152,17 +162,27 @@ module Conveyor
         end
       end
 
-      if ids.any?
-        redis.multi do |txn|
-          ids_and_queues.each do |results|
-            id, queue = results.as(Array)
-            if id && queue
-              txn.rpush "conveyor:queue:#{queue}", id.as(String)
-            end
-          end
-
-          txn.zrem "conveyor:scheduled", ids
+      # Ignore any jobs that don't have their `id` and `queue` property set.
+      # In an ideal world, this wouldn't ever actually remove anything, but
+      # we're just being cautious.
+      ids_and_queues = ids_and_queues.compact_map do |results|
+        id, queue = results.as(Array)
+        if id.is_a?(String) && queue.is_a?(String)
+          [id, queue]
         end
+      end
+
+      ids_by_queue = ids_and_queues.each_with_object({} of String => Array(String)) do |(id, queue), hash|
+        hash[queue] ||= [] of String
+        hash[queue] << id
+      end
+
+      redis.multi do |txn|
+        ids_by_queue.each do |(queue, ids)|
+          txn.rpush "conveyor:queue:#{queue}", ids
+        end
+
+        txn.zrem "conveyor:scheduled", ids
       end
     end
   end
@@ -210,6 +230,26 @@ module Redis
     enum SortType
       Score
       Lex
+    end
+  end
+
+  module Commands::List
+    def rpush(key : String, values : Enumerable(String))
+      command = Array(String).new(initial_capacity: 2 + values.size)
+      command << "rpush" << key
+      values.each { |value| command << value }
+
+      run command
+    end
+
+    def lpos(key : String, value : String, *, rank : String | Int | Nil = nil, count : String | Int | Nil = nil, maxlen : String | Int | Nil = nil)
+      command = Array(String).new(initial_capacity: 9)
+      command << "lpos" << key << value
+      command << "rank" << rank.to_s if rank
+      command << "count" << count.to_s if count
+      command << "maxlen" << maxlen.to_s if maxlen
+
+      run command
     end
   end
 end
