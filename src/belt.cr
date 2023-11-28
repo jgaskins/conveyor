@@ -54,7 +54,7 @@ module Conveyor
         while running?
           # Ensure we refresh the existence keys for all of the belts
           @redis.set "conveyor:belt:#{id}", "", ex: @presence_duration
-          sleep 1.second
+          sleep @presence_duration - 100.milliseconds
         end
       end
 

@@ -12,7 +12,7 @@ module Conveyor
         Belt.new(
           redis: config.redis,
           queues: config.queues,
-          presence_duration: config.orphan_check_interval * 1.5,
+          presence_duration: config.orphan_check_interval * 2,
           log: @log,
           max_attempts: config.max_attempts,
         )
