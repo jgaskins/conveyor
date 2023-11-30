@@ -110,7 +110,7 @@ module Conveyor
         # Only jobs that have been scheduled or picked up by a belt count as
         # orphans, and we also need to know which queue to enqueue it under
         # if it is indeed an orphan, so we select only those fields.
-        if raw_job_data = redis.hmget(key, "queue", "pending", "belt_id").as?(Array)
+        if raw_job_data = redis.hmget(key, "queue", "pending", "belt").as?(Array)
           queue, pending, belt_id = raw_job_data
 
           # Job ids are "conveyor:job:#{id}"
