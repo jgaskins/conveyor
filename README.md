@@ -63,8 +63,8 @@ ExampleJob.new(name: "Foo").enqueue
 To schedule the job to run at a later time, you can specify `in` or `at` arguments:
 
 ```crystal
-ExampleJob.new(name: "Time::Span").enqueue in: 1.minute
-ExampleJob.new(name: "Time").enqueue at: 5.minutes.from_now
+ExampleJob.new(name: "Time::Span").schedule in: 1.minute
+ExampleJob.new(name: "Time").schedule at: 5.minutes.from_now
 ```
 
 To set a job's default queue, define a `queue` method on it. If you don't specify one, it will be `"default"`.
