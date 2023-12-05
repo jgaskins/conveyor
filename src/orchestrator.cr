@@ -77,22 +77,22 @@ module Conveyor
       while @running
         sleep interval
 
-        @log.info { "Checking for orphans" }
-
         begin
           scan_for_orphans lock_duration: interval - 1.millisecond
         rescue ex
           @on_error.call ex
         end
-
-        @log.info { "Orphan scan complete" }
       end
     end
 
     # :nodoc:
     def scan_for_orphans(lock_duration : Time::Span)
       if @config.redis.set("conveyor:lock:orphan-check", "", nx: true, ex: lock_duration)
+        @log.info { "Checking for orphans" }
+
         scan_for_orphans!
+
+        @log.info { "Orphan scan complete" }
       end
     end
 
