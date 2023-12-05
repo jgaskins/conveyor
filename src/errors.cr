@@ -7,4 +7,5 @@ module Conveyor
   end
 
   Exception.define UnknownJobType
+  Exception.define NoBelts
 end

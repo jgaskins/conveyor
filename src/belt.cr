@@ -100,29 +100,35 @@ module Conveyor
       end
       start = Time.monotonic
       if result = @redis.blpop(queues, timeout: @timeout).as?(Array)
+        queue, job_id = {String, String}.from result
         @log.trace &.emit "Received job",
-          poll_duration_sec: (Time.monotonic - start).total_seconds
-        queue, job_id = result
-        queue = queue.as(String)
-        job_id = job_id.as(String)
-        key = "conveyor:job:#{job_id}"
-        if result = @redis.hmget(key, "id", "type", "queue", "attempts", "payload").as?(Array)
-          id, type, queue, attempts, payload = result
-          if id && type && queue && payload
-            @redis.hset key,
-              pending: "true",
-              belt: object_id.to_s
-            JobData.new({
-              "id"       => id,
-              "type"     => type,
-              "queue"    => queue,
-              "attempts" => attempts || "0",
-              "payload"  => payload,
-            })
-          end
-        else
-          @log.info &.emit "Missing job", id: job_id, queue: queue
-        end
+          poll_duration_sec: (Time.monotonic - start).total_seconds,
+          job_id: job_id
+
+        fetch_job_data(job_id, queue.lchop("conveyor:queue:"))
+      end
+    end
+
+    # :nodoc:
+    def fetch_job_data(id : String, queue : String)
+      key = "conveyor:job:#{id}"
+
+      type, attempts, payload = @redis
+        .hmget(key, "type", "attempts", "payload")
+        .as(Array)
+
+      if type && payload
+        attempts ||= 0
+        @redis.hset key,
+          pending: "true",
+          belt: id.to_s
+        JobData.new(
+          id: id,
+          type: type.as(String),
+          queue: queue,
+          attempts: attempts.as(String | Int32).to_i,
+          payload: payload.as(String),
+        )
       end
     end
 
@@ -132,36 +138,42 @@ module Conveyor
     # run on an exponential-backoff schedule based on how many times the job has
     # been attempted.
     def work(data : JobData)
-      if job = data.job
-        @log.debug &.emit "starting", id: data.id, type: data.type, queue: data.queue, attempts: data.attempts
-        start = Time.monotonic
-        begin
-          clear_outdated_jobs!
+      @log.debug &.emit "starting",
+        id: data.id,
+        type: data.type,
+        queue: data.queue,
+        attempts: data.attempts
 
-          work job
-          delete data.id
-          finish = Time.monotonic
-          @log.info &.emit "complete",
-            id: data.id,
-            type: data.type,
-            queue: data.queue,
-            attempts: data.attempts + 1,
-            duration_sec: (finish - start).total_seconds
-        rescue ex
-          @on_error.call ex
-          errored_at = Time.monotonic
-          @log.error exception: ex, &.emit "error",
-            id: data.id,
-            type: data.type,
-            queue: data.queue,
-            attempts: data.attempts + 1,
-            duration_sec: (errored_at - start).total_seconds
-          reenqueue data, ex
-        ensure
-          @jobs << start
-        end
-      else
-        raise UnknownJobType.new("No job type registered for #{data.type.inspect}")
+      start = Time.monotonic
+      begin
+        clear_outdated_jobs!
+        job = data.job
+
+        work job
+        delete data.id
+        finish = Time.monotonic
+        @log.info &.emit "complete",
+          id: data.id,
+          type: data.type,
+          queue: data.queue,
+          attempts: data.attempts + 1,
+          duration_sec: (finish - start).total_seconds
+      rescue ex
+        @on_error.call ex
+        errored_at = Time.monotonic
+        max_attempts = data.job_type.max_attempts rescue 25
+
+        @log.error exception: ex, &.emit "error",
+          id: data.id,
+          type: data.type,
+          queue: data.queue,
+          attempts: data.attempts + 1,
+          max_attempts: max_attempts,
+          duration_sec: (errored_at - start).total_seconds
+
+        reenqueue data, max_attempts, ex
+      ensure
+        @jobs << start
       end
     end
 
@@ -171,17 +183,17 @@ module Conveyor
     end
 
     # Reschedule the job to run after an amount of time based on the number of times the job has been attempted has passed.
-    def reenqueue(job_data : JobData, exception : ::Exception?) : self
+    def reenqueue(job_data : JobData, max_attempts : Int32, exception : ::Exception?) : self
       job_key = "conveyor:job:#{job_data.id}"
 
       @redis.pipeline do |pipe|
         pipe.hincrby job_key, "attempts", "1"
-        pipe.hdel "pending", "belt_id"
-        if message = exception.try(&.message)
-          pipe.hset job_key, "error", message
+        pipe.hdel job_key, "pending", "belt"
+        if exception
+          pipe.hset job_key, "error", exception.inspect
         end
 
-        if job_data.attempts < @max_attempts
+        if job_data.attempts + 1 < max_attempts
           # Exponential backoff, up to 2**25 milliseconds (9 hours and change)
           scheduled_time = (1 << {job_data.attempts + 5, 25}.min)
             .milliseconds
@@ -192,7 +204,8 @@ module Conveyor
             score: scheduled_time.to_unix_ms,
             value: job_data.id
         else
-          pipe.hset job_key, dead: "true"
+          # TODO: Add RENAME to the Redis shard
+          pipe.run({"rename", job_key, "conveyor:dead-job:#{job_data.id}"})
           pipe.sadd "conveyor:dead", job_data.id
         end
       end
@@ -205,15 +218,15 @@ module Conveyor
       self
     end
 
-    def clear_queues(queues : Enumerable(String))
-      queue_keys = queues.map { |queue| "conveyor:queue:#{queue}" }
+    def clear_queues!
+      queue_keys = @queues.map { |queue| "conveyor:queue:#{queue}" }
       job_keys = @redis
         .pipeline do |pipe|
           queue_keys.each do |key|
             pipe.lrange(key, 0, -1)
           end
         end
-        .flat_map &.as(Array)
+        .flat_map(&.as(Array))
         .flat_map { |id| "conveyor:job:#{id}" }
       @redis.unlink job_keys + queue_keys
     end

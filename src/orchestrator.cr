@@ -185,6 +185,14 @@ module Conveyor
         txn.zrem "conveyor:scheduled", ids
       end
     end
+
+    def clear_queues!
+      if belt = @belts.first?
+        belt.clear_queues!
+      else
+        raise NoBelts.new("There are no Conveyor belts defined")
+      end
+    end
   end
 end
 

@@ -24,8 +24,12 @@ module Conveyor
     end
 
     def job
-      if handler = Job.handler_for(type)
-        handler.from_json payload
+      job_type.from_json payload
+    end
+
+    def job_type
+      if job_type = Job.handler_for(type)
+        job_type
       else
         raise UnknownJobType.new("No job type registered for #{type.inspect}")
       end

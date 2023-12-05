@@ -18,9 +18,6 @@ module Conveyor
   abstract struct Job
     include JSON::Serializable
 
-    # :nodoc:
-    getter conveyor_job_id : String { generate_id }
-
     def initialize
     end
 
@@ -68,7 +65,7 @@ module Conveyor
     #
     # MyJob.new("asdf").enqueue in: 1.minute
     # ```
-    def schedule(in delay : Time::Span, queue : String = self.queue, configuration config : Configuration = CONFIG) : self
+    def schedule(in delay : Time::Span, queue : String = self.queue, configuration config : Configuration = CONFIG) : String
       schedule at: delay.from_now, queue: queue, configuration: config
     end
 
@@ -89,19 +86,21 @@ module Conveyor
     #
     # MyJob.new("asdf").enqueue at: timestamp
     # ```
-    def schedule(at time : Time, queue : String = self.queue, configuration config : Configuration = CONFIG) : self
+    def schedule(at time : Time, queue : String = self.queue, configuration config : Configuration = CONFIG) : String
+      id = generate_id
+
       config.redis.pipeline do |pipe|
-        pipe.hset "conveyor:job:#{conveyor_job_id}",
-          id: conveyor_job_id,
+        pipe.hset "conveyor:job:#{id}",
+          id: id,
           type: conveyor_job_type,
           queue: queue,
           payload: to_json
         pipe.zadd "conveyor:scheduled",
           score: time.to_unix_ms,
-          value: conveyor_job_id
+          value: id
       end
 
-      self
+      id
     end
 
     # Enqueues this job in the specified queue, or to the job's default queue if
@@ -120,35 +119,35 @@ module Conveyor
     #
     # MyJob.new("asdf").enqueue
     # ```
-    def enqueue(*, queue : String = self.queue, configuration config : Configuration = CONFIG) : self
+    def enqueue(*, queue : String = self.queue, configuration config : Configuration = CONFIG) : String
+      id = generate_id
+
       result = config.redis.pipeline do |pipe|
-        pipe.hset "conveyor:job:#{conveyor_job_id}",
-          id: conveyor_job_id,
+        pipe.hset "conveyor:job:#{id}",
+          id: id,
           type: conveyor_job_type,
           queue: queue,
           payload: to_json
-        pipe.rpush "conveyor:queue:#{queue}", conveyor_job_id
+        pipe.rpush "conveyor:queue:#{queue}", id
       end
 
-      self
+      id
     end
 
     # Remove this job from all queues. This method will not unschedule the job.
-    def dequeue(*, configuration config : Configuration = CONFIG) : self
+    def self.dequeue(id : String, *, configuration config : Configuration = CONFIG) : Nil
       # We don't need to remove the job from any queues. When the job fetcher
       # retrieves the job data, if the key doesn't exist it will ignore it and
-      # move onto the next job. This makes dequeuing an O(1) operation.
-      config.redis.unlink "conveyor:job:#{conveyor_job_id}"
-      self
+      # fetch the next job. This makes dequeuing an O(1) operation.
+      config.redis.unlink "conveyor:job:#{id}"
     end
 
     # If this job was scheduled via one of the `schedule` methods, this method will remove it from the schedule.
-    def unschedule(configuration config : Configuration = CONFIG) : self
-      config.redis.zrem "conveyor:scheduled", conveyor_job_id
-      self
+    def self.unschedule(id : String, configuration config : Configuration = CONFIG) : Nil
+      config.redis.zrem "conveyor:scheduled", id
     end
 
-    # Override this method to
+    # :nodoc:
     def queue
       "default"
     end
@@ -158,10 +157,30 @@ module Conveyor
       UUID.random.to_s
     end
 
+    # Define the queue your job will enqueue on by default
+    #
+    # ```
+    # struct SendEmail < Conveyor::Job
+    #   # Emails get their own queue
+    #   queue "email"
+    #
+    #   def initialize(@email_address : String, @body : String)
+    #   end
+    #
+    #   def call
+    #     # ...
+    #   end
+    # end
+    # ```
     macro queue(name)
       def queue
         "{{name.id}}"
       end
+    end
+
+    class_getter max_attempts : Int32 = 25
+
+    def self.max_attempts(@@max_attempts : Int32)
     end
   end
 end
