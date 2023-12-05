@@ -60,12 +60,35 @@ To enqueue this job, call `enqueue` on an instance of it:
 ExampleJob.new(name: "Foo").enqueue
 ```
 
+### Scheduling jobs
+
 To schedule the job to run at a later time, you can specify `in` or `at` arguments:
 
 ```crystal
 ExampleJob.new(name: "Time::Span").schedule in: 1.minute
 ExampleJob.new(name: "Time").schedule at: 5.minutes.from_now
 ```
+
+### Recurring jobs
+
+Recurring jobs can be scheduled on the orchestrator:
+
+```crystal
+struct MyDailyJob < Conveyor::Job
+  def call
+    # ...
+  end
+end
+
+Conveyor.orchestrator.schedule do |schedule|
+  schedule.daily MyDailyJob.new, at: "06:15", in: Time::Location::UTC
+  schedule.every 30.seconds, Poll
+end
+```
+
+Multiple instances of your workers will coordinate so you won't get multiple instances of each one.
+
+## Setting queue
 
 To set a job's default queue, define a `queue` method on it. If you don't specify one, it will be `"default"`.
 

@@ -10,4 +10,8 @@ module Conveyor
   VERSION = "0.1.0"
 
   class_getter orchestrator : Orchestrator { Orchestrator.new(CONFIG) }
+
+  def self.schedule
+    orchestrator.schedule { |schedule| yield schedule }
+  end
 end

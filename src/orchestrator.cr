@@ -1,5 +1,6 @@
 require "./belt"
 require "./configuration"
+require "./scheduler"
 
 module Conveyor
   class Orchestrator
@@ -8,6 +9,7 @@ module Conveyor
     @running = false
 
     def initialize(configuration @config = CONFIG, @log = Log.for("conveyor"))
+      @scheduler = Scheduler.new(redis: config.redis)
       @belts = Array.new(config.concurrency) do
         Belt.new(
           redis: config.redis,
@@ -29,6 +31,7 @@ module Conveyor
       spawn stats
       spawn check_for_orphans
       spawn check_for_scheduled
+      @scheduler.start
 
       while @running
         sleep 100.milliseconds
@@ -44,6 +47,7 @@ module Conveyor
     end
 
     def stop
+      @scheduler.stop
       @running = false
       @belts.each(&.stop)
     end
@@ -53,6 +57,10 @@ module Conveyor
     def on_error(&@on_error : ::Exception -> Nil) : self
       @belts.each(&.on_error(&on_error))
       self
+    end
+
+    def schedule : Nil
+      yield @scheduler
     end
 
     def stats
