@@ -183,4 +183,18 @@ module Conveyor
     def self.max_attempts(@@max_attempts : Int32)
     end
   end
+
+  # You can use this job type for testing empty jobs, such as benchmarking your
+  # job-processing infrastructure (compute infra and Redis).
+  struct Bogus < self
+    def call
+    end
+  end
+
+  # This is provided just to make sure we have at least 2 Job subclasses. As of
+  # Crystal 1.10.1, it crashes the compiler if there aren't.
+  private struct Bogus2 < self
+    def call
+    end
+  end
 end
