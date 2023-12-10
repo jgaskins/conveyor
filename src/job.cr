@@ -192,7 +192,8 @@ module Conveyor
 
     # This is provided just to make sure we have at least 2 Job subclasses. As of
     # Crystal 1.10.1, it crashes the compiler if there aren't.
-    private struct Bogus2 < self
+    # :nodoc:
+    struct Bogus2 < self
       def call
       end
     end
