@@ -76,7 +76,9 @@ module Conveyor
           if primary
             @redis.expire "conveyor:lock:scheduler", interval * 2
           else
-            primary  = check_primary
+            if primary = check_primary
+              Log.for("conveyor.scheduler").info { "taking over recurring job scheduling duties" }
+            end
           end
           tick primary
         end
@@ -92,7 +94,7 @@ module Conveyor
       has_run = false
 
       if enqueue
-        Log.for("conveyor.scheduler").debug { "tick" }
+        Log.for("conveyor.scheduler").trace { "tick" }
       end
 
       @jobs.each do |scheduled_job|
