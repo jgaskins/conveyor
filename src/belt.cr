@@ -173,7 +173,7 @@ module Conveyor
       rescue ex
         @on_error.call ex
         errored_at = Time.monotonic
-        max_attempts = data.job_type.max_attempts rescue 25
+        max_attempts = data.job_type.max_attempts rescue @max_attempts
 
         @log.error exception: ex, &.emit "error",
           id: data.id,
