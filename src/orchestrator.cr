@@ -95,12 +95,16 @@ module Conveyor
 
     # :nodoc:
     def scan_for_orphans(lock_duration : Time::Span)
-      if @config.redis.set("conveyor:lock:orphan-check", "", nx: true, ex: lock_duration)
+      lock_key = "conveyor:lock:orphan-check"
+
+      if @config.redis.set(lock_key, "", nx: true, ex: lock_duration)
         @log.info { "Checking for orphans" }
 
         scan_for_orphans!
 
         @log.info { "Orphan scan complete" }
+
+        @config.redis.unlink lock_key
       end
     end
 
