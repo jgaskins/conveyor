@@ -125,13 +125,13 @@ module Conveyor
         if raw_job_data = redis.hmget(key, "queue", "pending", "belt").as?(Array)
           queue, pending, belt_id = raw_job_data
 
-          # Job ids are "conveyor:job:#{id}"
-          id = key.lchop "conveyor:job:"
-
           # If it was set as pending and it has a belt id that no longer
           # matches a running belt, then the job is orphaned and needs to be
           # requeued in its original queue.
           if pending && belt_id && belt_id_cache[belt_id] == false
+            # Job ids are "conveyor:job:#{id}"
+            id = key.lchop "conveyor:job:"
+
             redis.rpush "conveyor:queue:#{queue}", id
           end
         end
