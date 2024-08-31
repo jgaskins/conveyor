@@ -1,0 +1,4 @@
+<form method="<%= method %>" action="<%= action %>" hx-<%= method.downcase %>="<%= action %>" hx-target="body">
+  <input type="hidden" name="_authenticity_token" value="<%== Armature::Form::Helper.authenticity_token_for session %>">
+  <% @block.call %>
+</form>

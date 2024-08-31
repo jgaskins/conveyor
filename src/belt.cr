@@ -52,9 +52,14 @@ module Conveyor
 
       spawn do
         while running?
-          # Ensure we refresh the existence keys for all of the belts
-          @redis.set "conveyor:belt:#{id}", "", ex: @presence_duration
-          sleep @presence_duration - 100.milliseconds
+          begin
+            # Ensure we refresh our presence key so the orchestrator knows we're
+            # still here
+            @redis.set "conveyor:belt:#{id}", ".", ex: @presence_duration
+          rescue ex
+          ensure
+            sleep @presence_duration - 100.milliseconds
+          end
         end
       end
 
@@ -62,7 +67,12 @@ module Conveyor
         begin
           run_one
         rescue ex
-          @on_error.call ex
+          begin
+            @on_error.call ex
+          rescue secondary_failure
+            # If the error handler raises, wtf do we even do?
+            @log.error(exception: secondary_failure) { secondary_failure }
+          end
         end
       end
     ensure

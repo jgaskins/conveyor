@@ -70,7 +70,7 @@ module Conveyor
         finish = Time.monotonic
         working = @belts.count(&.state.working?)
         jobs_per_second = @belts.sum(&.jobs_per_second)
-        @log.notice &.emit "stats",
+        @log.info &.emit "stats",
           working: working,
           jobs_per_second: jobs_per_second
       end

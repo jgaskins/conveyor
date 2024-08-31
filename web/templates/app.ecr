@@ -1,0 +1,25 @@
+<dl>
+  <dt>Queues</dt>
+  <dd>
+    <ul>
+      <% queues.each_key do |key| %>
+        <li>
+          <%= key %>
+        </li>
+      <% end %>
+    </ul>
+  </dd>
+  <dt>Enqueued jobs</dt>
+  <dd><%== JobsTable.new path, enqueued_jobs, session %></dd>
+  <dt>Scheduled jobs</dt>
+  <dd><%== JobsTable.new path, scheduled_jobs, session %></dd>
+  <dt>Pending jobs</dt>
+  <dd><%== JobsTable.new path, pending_jobs, session %></dd>
+  <dt>
+    Orphaned jobs
+    <%|== Form.new "POST", "#{path}/orphans/enqueue", session do %>
+      <button>enqueue all</button>
+    <%| end %>
+  </dt>
+  <dd><%== JobsTable.new path, orphaned_jobs, session %></dd>
+</dl>

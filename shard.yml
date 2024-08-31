@@ -9,6 +9,10 @@ dependencies:
     github: jgaskins/redis
     version: ">= 0.8.0"
 
+development_dependencies:
+  conveyor:
+    path: .
+
 crystal: '>= 1.10.1'
 
 license: MIT

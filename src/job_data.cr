@@ -9,23 +9,25 @@ module Conveyor
     getter attempts : Int32
     protected setter attempts
     getter payload : String
+    getter? pending = false
+    getter belt : String?
 
     def self.new(hash : Hash)
       new(
         id: hash["id"].as(String),
         type: hash["type"].as(String),
         queue: hash["queue"].as(String),
-        attempts: hash["attempts"].as(String).to_i32,
+        attempts: hash.fetch("attempts", 0).as(String | Int32).to_i32,
         payload: hash["payload"].as(String),
+        pending: hash["pending"]? == "true",
+        belt: hash["belt"]?.as(String?),
       )
     end
 
-    def initialize(@id, @type, @queue, @attempts, @payload)
+    def initialize(@id, @type, @queue, @attempts, @payload, @pending = false, @belt = nil)
     end
 
-    def job
-      job_type.from_json payload
-    end
+    getter job : Job { job_type.from_json payload }
 
     def job_type
       if job_type = Job.handler_for(type)

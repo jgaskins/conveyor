@@ -1,0 +1,30 @@
+<table>
+  <thead>
+    <tr>
+      <th>ID (shortened)</th>
+      <th>Type</th>
+      <th>Queue</th>
+      <th>Attempts</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% jobs.each do |job| %>
+      <tr>
+        <td title="<%= job.id %>"><%= job.id[-8..] %></td>
+        <td><%= job.type %></td>
+        <td><%= job.queue %></td>
+        <td><%= job.attempts || 1 %></td>
+        <td title="<%= job.payload %>">
+          <details>
+            <pre><%= JSON.parse(job.payload).pretty_inspect %></pre>
+          </details>
+        </td>
+        <td>
+          <%|== Form.new method: "DELETE", action: "#{base_path}/jobs/#{job.id}", session: session do %>
+            <button>&times;</button>
+          <%| end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
