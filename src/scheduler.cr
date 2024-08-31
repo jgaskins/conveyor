@@ -18,6 +18,18 @@ module Conveyor
       at time_of_day : String,
       in location : Time::Location = @location
     ) : Nil
+      weekly on: weekdays, at: time_of_day, in: location do
+        job
+      end
+    end
+
+    def weekly(
+      *,
+      on weekdays : Array(Time::DayOfWeek),
+      at time_of_day : String,
+      in location : Time::Location = @location,
+      &block : -> Job
+    ) : Nil
       hours, minutes = time_of_day.split(':', 2).map(&.to_i)
       now = Time.utc
       weekdays.each do |day|
@@ -26,11 +38,7 @@ module Conveyor
           next_run += 1.week
         end
 
-        @jobs << ScheduledJob.new(
-          job: job,
-          next_run: next_run,
-          interval: 1.week,
-        )
+        @jobs << ScheduledJob.new(next_run: next_run, interval: 1.week, &block)
       end
     end
 
@@ -40,6 +48,17 @@ module Conveyor
       at time_of_day : String,
       in location : Time::Location = @location
     ) : Nil
+      daily at: time_of_day, in: location do
+        job
+      end
+    end
+
+    def daily(
+      *,
+      at time_of_day : String,
+      in location : Time::Location = @location,
+      &block : -> Job
+    ) : Nil
       hours, minutes = time_of_day.split(':', 2).map(&.to_i)
       now = Time.utc
       next_run = now.in(location).at_beginning_of_day + hours.hours + minutes.minutes
@@ -47,19 +66,17 @@ module Conveyor
         next_run += 1.day
       end
 
-      @jobs << ScheduledJob.new(
-        job: job,
-        next_run: next_run,
-        interval: 1.day,
-      )
+      @jobs << ScheduledJob.new(next_run: next_run, interval: 1.day, &block)
     end
 
     def every(interval : Time::Span, job : Job, start_in : Time::Span = rand(interval.total_seconds).seconds) : Nil
-      @jobs << ScheduledJob.new(
-        job: job,
-        next_run: start_in.from_now,
-        interval: interval,
-      )
+      every interval, start_in do
+        job
+      end
+    end
+
+    def every(interval : Time::Span, start_in : Time::Span = rand(interval.total_seconds).seconds, &block : -> Job)
+      @jobs << ScheduledJob.new(next_run: start_in.from_now, interval: interval, &block)
     end
 
     def start : Nil
@@ -125,11 +142,14 @@ module Conveyor
     end
 
     class ScheduledJob
-      getter job : Job
       getter next_run : Time
       getter interval : Time::Span
 
-      def initialize(@job, @next_run, @interval)
+      def initialize(@next_run, @interval, &@job : -> Job)
+      end
+
+      def job
+        @job.call
       end
 
       def enqueue
