@@ -80,12 +80,14 @@ module Conveyor
     end
 
     # Fetch and perform a single job
-    def run_one
+    def run_one : Nil
       @state = :waiting
       if job_data = fetch
         @state = :working
         work job_data
       end
+    ensure
+      @state = :waiting
     end
 
     # Stop processing jobs on this belt. The currently processing job will finish as long as the process does not exit beforehand, but no new jobs will be processed on this belt.
