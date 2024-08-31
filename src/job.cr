@@ -18,6 +18,9 @@ module Conveyor
   abstract struct Job
     include JSON::Serializable
 
+    # :nodoc:
+    # Provides a default constructor so jobs that don't take arguments won't get
+    # popped by the compiler for not providing a JSON::PullParser.
     def initialize
     end
 
