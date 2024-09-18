@@ -11,7 +11,12 @@
   </dd>
   <dt>Enqueued jobs</dt>
   <dd><%== JobsTable.new path, enqueued_jobs, session %></dd>
-  <dt>Scheduled jobs</dt>
+  <dt>
+    Scheduled jobs
+    <%|== Form.new "POST", "#{path}/scheduled/enqueue", session do %>
+      <button>enqueue all</button>
+    <%| end %>
+  </dt>
   <dd><%== JobsTable.new path, scheduled_jobs, session %></dd>
   <dt>Pending jobs</dt>
   <dd><%== JobsTable.new path, pending_jobs, session %></dd>

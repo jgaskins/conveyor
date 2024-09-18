@@ -43,7 +43,6 @@ class Conveyor::Web
               {key.lchop("conveyor:queue:"), queue_entries[index].as(Array)}
             end
             .to_h
-          scheduled_job_ids = redis.zrange("conveyor:scheduled", "0", "-1").as(Array)
           belt_ids = belt_keys.map(&.lchop("conveyor:belt:")).to_set
 
           all_jobs = redis
@@ -94,8 +93,35 @@ class Conveyor::Web
         end
       end
 
+      r.on "scheduled" do
+        r.post "enqueue" do
+          jobs = redis
+            .pipeline do |pipe|
+              scheduled_job_ids.each do |id|
+                pipe.hgetall("conveyor:job:#{id}")
+              end
+            end
+            .compact_map do |raw|
+              data = raw.as(Array)
+              unless data.empty?
+                JobData.new Redis.to_hash(data)
+              end
+            end
+          jobs_by_queue = jobs.group_by(&.queue)
+          redis.pipeline do |pipe|
+            jobs_by_queue.each do |queue, jobs|
+              pipe.lpush "conveyor:queue:#{queue}", jobs.map(&.id)
+            end
+          end
+        end
+      end
+
       render "footer"
     end
+  end
+
+  def scheduled_job_ids
+    redis.zrange("conveyor:scheduled", "0", "-1").as(Array)
   end
 
   macro render(template, to io = nil)

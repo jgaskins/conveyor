@@ -1,5 +1,5 @@
 module Conveyor
-  private CONFIG = Configuration.new
+  CONFIG = Configuration.new
 
   def self.configure
     yield CONFIG
