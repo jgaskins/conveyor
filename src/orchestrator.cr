@@ -208,6 +208,9 @@ module Conveyor
   end
 end
 
+# :nodoc:
+# Patching Redis to support some operations that aren't yet in the shard
+# TODO: Upstream these things
 module Redis
   module Commands::SortedSet
     def zrange(
