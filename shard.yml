@@ -12,6 +12,8 @@ dependencies:
 development_dependencies:
   conveyor:
     path: .
+  armature:
+    github: jgaskins/armature
 
 crystal: '>= 1.10.1'
 

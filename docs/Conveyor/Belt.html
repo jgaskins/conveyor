@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.10.1">
+<meta name="crystal_docs.project_version" content="main-dev">
+<meta name="crystal_docs.project_name" content="conveyor">
+
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/doc.js"></script>
+
+  <meta name="repository-name" content="conveyor">
+  <title>Conveyor::Belt - conveyor main-dev</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../index.html">
+          conveyor
+        </a>
+      </h1>
+
+      <span class="project-version">
+        main-dev
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent open current" data-id="conveyor/Conveyor" data-name="conveyor">
+      <a href="../Conveyor.html">Conveyor</a>
+      
+        <ul>
+  
+  <li class="parent open current" data-id="conveyor/Conveyor/Belt" data-name="conveyor::belt">
+      <a href="../Conveyor/Belt.html">Belt</a>
+      
+        <ul>
+  
+  <li class=" " data-id="conveyor/Conveyor/Belt/State" data-name="conveyor::belt::state">
+      <a href="../Conveyor/Belt/State.html">State</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="conveyor/Conveyor/Configuration" data-name="conveyor::configuration">
+      <a href="../Conveyor/Configuration.html">Configuration</a>
+      
+    </li>
+  
+  <li class=" " data-id="conveyor/Conveyor/Exception" data-name="conveyor::exception">
+      <a href="../Conveyor/Exception.html">Exception</a>
+      
+    </li>
+  
+  <li class="parent " data-id="conveyor/Conveyor/Job" data-name="conveyor::job">
+      <a href="../Conveyor/Job.html">Job</a>
+      
+        <ul>
+  
+  <li class=" " data-id="conveyor/Conveyor/Job/Bogus" data-name="conveyor::job::bogus">
+      <a href="../Conveyor/Job/Bogus.html">Bogus</a>
+      
+    </li>
+  
+  <li class=" " data-id="conveyor/Conveyor/Job/Bogus2" data-name="conveyor::job::bogus2">
+      <a href="../Conveyor/Job/Bogus2.html">Bogus2</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="conveyor/Conveyor/JobData" data-name="conveyor::jobdata">
+      <a href="../Conveyor/JobData.html">JobData</a>
+      
+    </li>
+  
+  <li class=" " data-id="conveyor/Conveyor/NoBelts" data-name="conveyor::nobelts">
+      <a href="../Conveyor/NoBelts.html">NoBelts</a>
+      
+    </li>
+  
+  <li class=" " data-id="conveyor/Conveyor/Orchestrator" data-name="conveyor::orchestrator">
+      <a href="../Conveyor/Orchestrator.html">Orchestrator</a>
+      
+    </li>
+  
+  <li class="parent " data-id="conveyor/Conveyor/Scheduler" data-name="conveyor::scheduler">
+      <a href="../Conveyor/Scheduler.html">Scheduler</a>
+      
+        <ul>
+  
+  <li class=" " data-id="conveyor/Conveyor/Scheduler/ScheduledJob" data-name="conveyor::scheduler::scheduledjob">
+      <a href="../Conveyor/Scheduler/ScheduledJob.html">ScheduledJob</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="conveyor/Conveyor/UnknownJobType" data-name="conveyor::unknownjobtype">
+      <a href="../Conveyor/UnknownJobType.html">UnknownJobType</a>
+      
+    </li>
+  
+  <li class="parent " data-id="conveyor/Conveyor/Web" data-name="conveyor::web">
+      <a href="../Conveyor/Web.html">Web</a>
+      
+        <ul>
+  
+  <li class=" " data-id="conveyor/Conveyor/Web/Component" data-name="conveyor::web::component">
+      <a href="../Conveyor/Web/Component.html">Component</a>
+      
+    </li>
+  
+  <li class=" " data-id="conveyor/Conveyor/Web/Form" data-name="conveyor::web::form(t)">
+      <a href="../Conveyor/Web/Form.html">Form</a>
+      
+    </li>
+  
+  <li class=" " data-id="conveyor/Conveyor/Web/JobsTable" data-name="conveyor::web::jobstable(t)">
+      <a href="../Conveyor/Web/JobsTable.html">JobsTable</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="conveyor/Redis" data-name="redis">
+      <a href="../Redis.html">Redis</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> Conveyor::<wbr>Belt
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Conveyor/Belt.html">Conveyor::Belt</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+  <h2>
+    <a id="overview" class="anchor" href="#overview">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Overview
+  </h2>
+
+  <p>The <code><a href="../Conveyor/Belt.html">Conveyor::Belt</a></code> processes your <code><a href="../Conveyor/Job.html">Job</a></code> instances sequentially. Each job
+is fetched from Redis and placed on the belt to be processed. If the job
+does not complete successfully, it is removed from the belt and placed back
+in the queue, waiting an <a href="https://en.wikipedia.org/wiki/Exponential_backoff">exponential amount of
+time</a> before retrying.</p>
+<p>Your application can have one or more <code><a href="../Conveyor/Belt.html">Conveyor::Belt</a></code>s, allowing you to process multiple jobs concurrently. You can configure this by setting <code><a href="../Conveyor/Configuration.html#concurrency%3AInt32-instance-method">Configuration#concurrency</a></code>:</p>
+<pre><code class="language-crystal"><span class="t">Conveyor</span>.configure <span class="k">do</span> <span class="o">|</span>config<span class="o">|</span>
+  <span class="c"># ...</span>
+  c.concurrency <span class="o">=</span> <span class="n">10</span>
+<span class="k">end</span></code></pre>
+<p>The <code><a href="../Conveyor/Orchestrator.html">Orchestrator</a></code> will manage your <code><a href="../Conveyor/Belt.html">Belt</a></code> instances throughout their entire
+lifecycle, so you shouldn't need to deal with <code><a href="../Conveyor/Belt.html">Conveyor::Belt</a></code> directly in
+your application, but it's a good idea to know that it exists.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L25" target="_blank">
+        belt.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28%2A%2Credis%3ARedis%3A%3AClient%2Cqueues%3AArray%28String%29%2Cpresence_duration%3ATime%3A%3ASpan%2Ctimeout%3ATime%3A%3ASpan%3D2.seconds%2Clog%3ALog%3DLog.for%28%22conveyor.belt%22%29%2Cmax_attempts%3AInt32%3D25%29-class-method" class="signature"><strong>.new</strong>(*, redis : Redis::Client, queues : Array(String), presence_duration : Time::Span, timeout : Time::Span = <span class="n">2</span>.seconds, log : Log = <span class="t">Log</span>.<span class="k">for</span>(<span class="s">&quot;conveyor.belt&quot;</span>), max_attempts : Int32 = <span class="n">25</span>)</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#clear_queues%21-instance-method" class="signature"><strong>#clear_queues!</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#delete%28id%3AString%29%3Aself-instance-method" class="signature"><strong>#delete</strong>(id : String) : <span class="k">self</span></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#fetch%3AJobData%7CNil-instance-method" class="signature"><strong>#fetch</strong> : JobData | Nil</a>
+        
+          <div class="summary"><p>Retrieves <code><a href="../Conveyor/JobData.html">JobData</a></code> from Redis, if there are any pending jobs in any of the queues passed to this <code><a href="../Conveyor/Belt.html">Belt</a></code>'s constructor.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#id%3AString-instance-method" class="signature"><strong>#id</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#jobs_per_second-instance-method" class="signature"><strong>#jobs_per_second</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#on_error%28%26on_error%3A%3A%3AException-%3ENil%29-instance-method" class="signature"><strong>#on_error</strong>(&on_error : ::Exception -> Nil)</a>
+        
+          <div class="summary"><p>Tell this belt what to do when an exception occurs while <code><a href="../Conveyor/Belt.html#fetch%3AJobData%7CNil-instance-method">#fetch</a></code>ing or <code><a href="../Conveyor/Belt.html#work%28data%3AJobData%29-instance-method">#work</a></code>ing on a <code><a href="../Conveyor/Job.html">Job</a></code>.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#reenqueue%28job_data%3AJobData%2Cmax_attempts%3AInt32%2Cexception%3A%3A%3AException%7CNil%29%3Aself-instance-method" class="signature"><strong>#reenqueue</strong>(job_data : JobData, max_attempts : Int32, exception : ::Exception | Nil) : <span class="k">self</span></a>
+        
+          <div class="summary"><p>Reschedule the job to run after an amount of time based on the number of times the job has been attempted has passed.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#run_one%3ANil-instance-method" class="signature"><strong>#run_one</strong> : Nil</a>
+        
+          <div class="summary"><p>Fetch and perform a single job</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#running%3F%3ABool-instance-method" class="signature"><strong>#running?</strong> : Bool</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#start%28%26%29-instance-method" class="signature"><strong>#start</strong>(&)</a>
+        
+          <div class="summary"><p>Start up this belt to begin processing jobs from the queues that feed into it.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#state%3AState-instance-method" class="signature"><strong>#state</strong> : State</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#stop-instance-method" class="signature"><strong>#stop</strong></a>
+        
+          <div class="summary"><p>Stop processing jobs on this belt.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#work%28data%3AJobData%29-instance-method" class="signature"><strong>#work</strong>(data : JobData)</a>
+        
+          <div class="summary"><p>Deserializes the job payload provided by the given <code><a href="../Conveyor/JobData.html">JobData</a></code> and calls the job type's <code><a href="../Conveyor/Job.html#call-instance-method">Job#call</a></code> method.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(*,redis:Redis::Client,queues:Array(String),presence_duration:Time::Span,timeout:Time::Span=2.seconds,log:Log=Log.for(&quot;conveyor.belt&quot;),max_attempts:Int32=25)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(*, redis : Redis::Client, queues : Array(String), presence_duration : Time::Span, timeout : Time::Span = <span class="n">2</span>.seconds, log : Log = <span class="t">Log</span>.<span class="k">for</span>(<span class="s">&quot;conveyor.belt&quot;</span>), max_attempts : Int32 = <span class="n">25</span>)
+
+        <a class="method-permalink" href="#new%28%2A%2Credis%3ARedis%3A%3AClient%2Cqueues%3AArray%28String%29%2Cpresence_duration%3ATime%3A%3ASpan%2Ctimeout%3ATime%3A%3ASpan%3D2.seconds%2Clog%3ALog%3DLog.for%28%22conveyor.belt%22%29%2Cmax_attempts%3AInt32%3D25%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L37" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="clear_queues!-instance-method">
+      <div class="signature">
+        
+        def <strong>clear_queues!</strong>
+
+        <a class="method-permalink" href="#clear_queues%21-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L233" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="delete(id:String):self-instance-method">
+      <div class="signature">
+        
+        def <strong>delete</strong>(id : String) : <span class="k">self</span>
+
+        <a class="method-permalink" href="#delete%28id%3AString%29%3Aself-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L228" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="fetch:JobData|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>fetch</strong> : <a href="../Conveyor/JobData.html">JobData</a> | Nil
+
+        <a class="method-permalink" href="#fetch%3AJobData%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Retrieves <code><a href="../Conveyor/JobData.html">JobData</a></code> from Redis, if there are any pending jobs in any of
+the queues passed to this <code><a href="../Conveyor/Belt.html">Belt</a></code>'s constructor. This method also marks the
+job in Redis as <code>pending</code> and assigned to this <code><a href="../Conveyor/Belt.html">Belt</a></code>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L109" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="id:String-instance-method">
+      <div class="signature">
+        
+        def <strong>id</strong> : String
+
+        <a class="method-permalink" href="#id%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L28" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="jobs_per_second-instance-method">
+      <div class="signature">
+        
+        def <strong>jobs_per_second</strong>
+
+        <a class="method-permalink" href="#jobs_per_second-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L246" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="on_error(&amp;on_error:::Exception-&gt;Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>on_error</strong>(&on_error : ::Exception -> Nil)
+
+        <a class="method-permalink" href="#on_error%28%26on_error%3A%3A%3AException-%3ENil%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Tell this belt what to do when an exception occurs while <code><a href="../Conveyor/Belt.html#fetch%3AJobData%7CNil-instance-method">#fetch</a></code>ing or
+<code><a href="../Conveyor/Belt.html#work%28data%3AJobData%29-instance-method">#work</a></code>ing on a <code><a href="../Conveyor/Job.html">Job</a></code>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L102" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="reenqueue(job_data:JobData,max_attempts:Int32,exception:::Exception|Nil):self-instance-method">
+      <div class="signature">
+        
+        def <strong>reenqueue</strong>(job_data : <a href="../Conveyor/JobData.html">JobData</a>, max_attempts : Int32, exception : ::Exception | Nil) : <span class="k">self</span>
+
+        <a class="method-permalink" href="#reenqueue%28job_data%3AJobData%2Cmax_attempts%3AInt32%2Cexception%3A%3A%3AException%7CNil%29%3Aself-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Reschedule the job to run after an amount of time based on the number of times the job has been attempted has passed.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L198" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="run_one:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>run_one</strong> : Nil
+
+        <a class="method-permalink" href="#run_one%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Fetch and perform a single job</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L83" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="running?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>running?</strong> : Bool
+
+        <a class="method-permalink" href="#running%3F%3ABool-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L26" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="start(&amp;)-instance-method">
+      <div class="signature">
+        
+        def <strong>start</strong>(&)
+
+        <a class="method-permalink" href="#start%28%26%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Start up this belt to begin processing jobs from the queues that feed
+into it. This is called by the <code><a href="../Conveyor/Orchestrator.html">Orchestrator</a></code> on start.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L50" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="state:State-instance-method">
+      <div class="signature">
+        
+        def <strong>state</strong> : <a href="../Conveyor/Belt/State.html">State</a>
+
+        <a class="method-permalink" href="#state%3AState-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L27" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="stop-instance-method">
+      <div class="signature">
+        
+        def <strong>stop</strong>
+
+        <a class="method-permalink" href="#stop-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Stop processing jobs on this belt. The currently processing job will finish as long as the process does not exit beforehand, but no new jobs will be processed on this belt.</p>
+<p>The <code><a href="../Conveyor/Orchestrator.html">Orchestrator</a></code> typically calls this method.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L96" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="work(data:JobData)-instance-method">
+      <div class="signature">
+        
+        def <strong>work</strong>(data : <a href="../Conveyor/JobData.html">JobData</a>)
+
+        <a class="method-permalink" href="#work%28data%3AJobData%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Deserializes the job payload provided by the given <code><a href="../Conveyor/JobData.html">JobData</a></code> and calls the
+job type's <code><a href="../Conveyor/Job.html#call-instance-method">Job#call</a></code> method. If an exception occurs while processing the
+job, the belt's <code><a href="../Conveyor/Belt.html#on_error%28%26on_error%3A%3A%3AException-%3ENil%29-instance-method">#on_error</a></code> block is invoked and the job is rescheduled to
+run on an exponential-backoff schedule based on how many times the job has
+been attempted.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/jgaskins/conveyor/blob/main/src/belt.cr#L152" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+</div>
+
+</body>
+</html>
