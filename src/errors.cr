@@ -1,5 +1,6 @@
 module Conveyor
   class Exception < ::Exception
+    # :nodoc:
     macro define(name)
       class {{name}} < {{@type}}
       end
