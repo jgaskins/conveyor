@@ -11,7 +11,7 @@ module Conveyor
 
   class_getter orchestrator : Orchestrator { Orchestrator.new(CONFIG) }
 
-  def self.schedule
+  def self.schedule(&)
     orchestrator.schedule { |schedule| yield schedule }
   end
 end

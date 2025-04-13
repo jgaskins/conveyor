@@ -52,14 +52,14 @@ module Conveyor
       @belts.each(&.stop)
     end
 
-    @on_error : (::Exception -> Nil) = ->(ex : ::Exception) {}
+    @on_error : (::Exception -> Nil) = ->(ex : ::Exception) { }
 
     def on_error(&@on_error : ::Exception -> Nil) : self
       @belts.each(&.on_error(&on_error))
       self
     end
 
-    def schedule : Nil
+    def schedule(&) : Nil
       yield @scheduler
     end
 
@@ -220,7 +220,7 @@ module Redis
       by sort_type : SortType? = nil,
       rev reverse : Bool? = nil,
       limit : {Int64, Int64}? = nil,
-      withscores : Bool? = nil
+      withscores : Bool? = nil,
     )
       low = case value = range.begin
             in Value

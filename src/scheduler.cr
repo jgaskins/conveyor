@@ -16,7 +16,7 @@ module Conveyor
       *,
       on weekdays : Array(Time::DayOfWeek),
       at time_of_day : String,
-      in location : Time::Location = @location
+      in location : Time::Location = @location,
     ) : Nil
       weekly on: weekdays, at: time_of_day, in: location do
         job
@@ -46,7 +46,7 @@ module Conveyor
       job : Job,
       *,
       at time_of_day : String,
-      in location : Time::Location = @location
+      in location : Time::Location = @location,
     ) : Nil
       daily at: time_of_day, in: location do
         job

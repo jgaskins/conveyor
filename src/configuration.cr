@@ -1,7 +1,7 @@
 module Conveyor
   CONFIG = Configuration.new
 
-  def self.configure
+  def self.configure(&)
     yield CONFIG
     nil
   end

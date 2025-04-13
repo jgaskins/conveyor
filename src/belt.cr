@@ -29,7 +29,7 @@ module Conveyor
 
     @redis : Redis::Client
     @queues : Array(String)
-    @on_error : Proc(::Exception, Nil) = ->(ex : ::Exception) {}
+    @on_error : Proc(::Exception, Nil) = ->(ex : ::Exception) { }
     @jobs = Deque(Time::Span).new
     @presence_duration : Time::Span
     @max_attempts : Int32
@@ -41,13 +41,13 @@ module Conveyor
       @presence_duration,
       @timeout = 2.seconds,
       @log = Log.for("conveyor.belt"),
-      @max_attempts = 25
+      @max_attempts = 25,
     )
     end
 
     # Start up this belt to begin processing jobs from the queues that feed
     # into it. This is called by the `Orchestrator` on start.
-    def start
+    def start(&)
       @running = true
 
       spawn do
