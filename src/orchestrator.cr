@@ -59,8 +59,9 @@ module Conveyor
       self
     end
 
-    def schedule(&) : Nil
+    def schedule(&)
       yield @scheduler
+      self
     end
 
     def stats
