@@ -125,13 +125,13 @@ module Conveyor
     def enqueue(*, queue : String = self.queue, configuration config : Configuration = CONFIG) : String
       id = generate_id
 
-      result = config.redis.pipeline do |pipe|
-        pipe.hset "conveyor:job:#{id}",
+      config.redis.multi do |txn|
+        txn.hset "conveyor:job:#{id}",
           id: id,
           type: conveyor_job_type,
           queue: queue,
           payload: to_json
-        pipe.rpush "conveyor:queue:#{queue}", id
+        txn.rpush "conveyor:queue:#{queue}", id
       end
 
       id
